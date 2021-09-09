@@ -19,6 +19,8 @@ import datetime
 
 import nltk
 from nltk.corpus import stopwords
+stopword = stopwords.words('english')
+from rank_bm25 import BM25Okapi, BM25Plus, BM25L
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 
@@ -35,7 +37,6 @@ from utils.torch_utils import load_saved, move_to_cuda
 from qa.utils_qa import postprocess_qa_predictions
 from qa.trainer_qa import QuestionAnsweringTrainer
 from sklearn.cluster import KMeans
-
 from annotated_text import annotated_text
 from coqa_process.span_heuristic import find_closest_span_match
 
@@ -54,7 +55,6 @@ chosen_model_reader = args.qa_model_name
 reader_path = args.qa_model_name
 
 cuda = torch.device('cuda')
-
 def filter_stopwords(s):
     tokens = s.split()
     stop_words = set(stopwords.words('english'))
@@ -108,7 +108,6 @@ def find_span(query,text):
     return None
 
 if __name__ =='__main__':
-
     dense_index_path = args.index_path
     model, tokenizer, index, corpus = init_dense(dense_index_path)
 
@@ -153,6 +152,24 @@ if __name__ =='__main__':
             top_doc_ids = indices[0]
             topk_docs = [{"title": corpus[str(doc_id)][0], "text": corpus[str(
                 doc_id)][1], "date": corpus[str(doc_id)][4], "journal": corpus[str(doc_id)][5]} for doc_id in top_doc_ids]
+
+            # rerank bm25
+            doc_texts = [x["text"].lower() for x in topk_docs]
+            word_tokens = [nltk.word_tokenize(doc) for doc in doc_texts]
+            tokenized_corpus = []
+            for doc in word_tokens:
+                temp = [word for word in doc if word not in stopword]
+                tokenized_corpus.append(temp)
+            bm25 = BM25Plus(tokenized_corpus)
+            tokenized_query = query.lower().split(" ")
+            doc_scores = bm25.get_scores(tokenized_query)
+            related_docs_indices = doc_scores.argsort()[::-1]
+            reranked = []
+            for doc_index in related_docs_indices:
+                reranked.append(topk_docs[doc_index])
+            topk_docs = reranked
+
+
             topk_docs_date = []
             for doc in topk_docs:
                 if checkDate(datetime.datetime(startDate.year, startDate.month, startDate.day),
