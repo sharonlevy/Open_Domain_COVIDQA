@@ -1,6 +1,6 @@
 # Open-Domain Question-Answering for COVID-19 and Other Emergent Domains
 
-This repository contains the source code for an end-to-end open-domain question answering system. The system is made up of two components: a retriever model and a reading comprehension (question answering) model. We provide the code for these two models in addition to demo code based on Streamlit. 
+This repository contains the source code for an end-to-end open-domain question answering system. The system is made up of two components: a retriever model and a reading comprehension (question answering) model. We provide the code for these two models in addition to demo code based on Streamlit. A video of the demo can be viewed [here](https://www.youtube.com/watch?v=lk8LeIF4U7U).
 
 
 ## Installation
