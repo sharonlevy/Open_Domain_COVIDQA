@@ -1,4 +1,4 @@
-# Open-Domain Question Answering for COVID-19 (Phase A)
+# Open-Domain Question-Answering for COVID-19 and Other Emergent Domains
 
 This repository contains the source code for an end-to-end open-domain question answering system. The system is made up of two components: a retriever model and a reading comprehension (question answering) model. We provide the code for these two models in addition to demo code based on Streamlit. 
 
@@ -57,6 +57,7 @@ Here are things to keep in mind:
 1. The output_dir flag is where the model will be saved.
 2. You can define the init_checkpoint flag to continue fine-tuning on another dataset.
 ```
+The Dense retrieval model is then combined with BM25 for reranking (see paper for details).
 
 ### Corpus
 Next, go to ```scripts/encode_covid_corpus.sh``` for the command to encode our corpus.
@@ -125,19 +126,9 @@ CUDA_VISIBLE_DEVICES=0 python ../qa/run_qa.py \
   --output_dir /path/to/model/output \
 ```
 
-Evaluation results:
-
-| Model                                | Datasets             | Exact Match | F1          |
-| -----------                          | -----------          | ----------- | ----------- |
-| BERT                                 | COVIDQA              | 12.27       | 39.07       |
-| BERT                                 | SQUAD2.0             | 29.24       | 59.34       |
-| BioBERT                              | SQUAD2.0             | 30.54       | 59.39       |
-| BERT                                 | SQUAD2.0+COVIDQA     | 33.68       | 65.53       |
-| BioBERT                              | SQUAD2.0+COVIDQA     | 37.59       | 66.67       |
-| BioBERT w/ multiple answer spans     | SQUAD2.0+COVIDQA     | 39.16       | 72.03       |
 
 ## Demo
-We combine the retrieval and reading models for an end-to-end open-domain question answering demo with Streamlit. This can be run with ```scripts/demo.sh```.
+We combine the retrieval model and reading model for an end-to-end open-domain question answering demo with Streamlit. This can be run with ```scripts/demo.sh```.
 ```
 CUDA_VISIBLE_DEVICES=0 streamlit run ../covid_qa_demo.py -- \
   --retriever-model-name microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext \
@@ -154,8 +145,4 @@ Here are things to keep in mind:
 ```
 
 ## Requirements
-- Python 3
-- PyTorch 1.7
-- transformers 4.5.1
-- sentence-transformers 1.1.1
-- Streamlit
+See requirements.txt
